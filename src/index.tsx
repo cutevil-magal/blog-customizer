@@ -1,5 +1,5 @@
 import { createRoot } from 'react-dom/client';
-import { StrictMode, CSSProperties, useState } from 'react';
+import { StrictMode, CSSProperties, useState, useMemo } from 'react';
 import clsx from 'clsx';
 
 import { Article } from './components/article/Article';
@@ -15,43 +15,21 @@ const root = createRoot(domNode);
 const App = () => {
 	const [articleState, setArticleState] = useState(defaultArticleState); // Главное состояние приложения
 
-	const appStyles = (state = articleState) => {
-		// Динамические стили на основе состояния
+	const appStyles = useMemo(() => {
 		return {
-			'--font-family': state.fontFamilyOption.value,
-			'--font-size': state.fontSizeOption.value,
-			'--font-color': state.fontColor.value,
-			'--container-width': state.contentWidth.value,
-			'--bg-color': state.backgroundColor.value,
+			'--font-family': articleState.fontFamilyOption.value,
+			'--font-size': articleState.fontSizeOption.value,
+			'--font-color': articleState.fontColor.value,
+			'--container-width': articleState.contentWidth.value,
+			'--bg-color': articleState.backgroundColor.value,
 		} as CSSProperties;
-	};
-
-	const handleStateChange = (newState: typeof defaultArticleState) => {
-		setArticleState(newState); // Обновляем главное состояние
-	};
-
-	const handleReset = () => {
-		setArticleState(defaultArticleState); // Сбрасываем к оригиналу
-	};
+	}, [articleState]);
 
 	return (
-		<main
-			className={clsx(styles.main)}
-			// style={
-			// 	{
-			// 		'--font-family': defaultArticleState.fontFamilyOption.value,
-			// 		'--font-size': defaultArticleState.fontSizeOption.value,
-			// 		'--font-color': defaultArticleState.fontColor.value,
-			// 		'--container-width': defaultArticleState.contentWidth.value,
-			// 		'--bg-color': defaultArticleState.backgroundColor.value,
-			// 	} as CSSProperties
-			// }>
-			// <ArticleParamsForm />
-			style={appStyles()}>
+		<main className={clsx(styles.main)} style={appStyles}>
 			<ArticleParamsForm
-				currentState={articleState}
-				onSubmit={handleStateChange}
-				onReset={handleReset}
+				setArticleState={setArticleState}
+				articleState={articleState}
 			/>
 			<Article />
 		</main>

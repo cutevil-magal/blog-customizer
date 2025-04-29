@@ -17,53 +17,46 @@ import {
 	defaultArticleState,
 } from 'src/constants/articleProps';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 type ArticleParamsFormProps = {
-	currentState: typeof defaultArticleState;
-	onSubmit: (state: typeof defaultArticleState) => void;
-	onReset: () => void;
+	articleState: typeof defaultArticleState;
+	setArticleState: (state: typeof defaultArticleState) => void;
 };
 
 export const ArticleParamsForm = ({
-	currentState,
-	onSubmit,
-	onReset,
+	articleState, // состояние формы  из App
+	setArticleState,
 }: ArticleParamsFormProps) => {
-	const { isOpen, toggle, sidebarRef } = useDisclosure(false);
+	const { isFormOpen, toggleForm, sidebarRef } = useDisclosure(false);
 
-	const [state, setState] = useState(defaultArticleState); // Локальное состояние формы
-
-	// при изменении внешнего состояния (например, после сброса)
-	useEffect(() => {
-		setState(currentState);
-	}, [currentState]);
+	const [currentArticleState, setCurrentArticleState] = useState(articleState); // Локальное состояние формы
 
 	// Универсальный обработчик для всех полей формы
-	const handleFieldChange = (fieldName: keyof typeof state) => (value: any) => {
-		setState((prevState) => ({
-			...prevState,
-			[fieldName]: value,
-		}));
+	const handleFieldChange =
+		(fieldName: keyof typeof currentArticleState) => (value: object) => {
+			setCurrentArticleState((prevState) => ({
+				...prevState,
+				[fieldName]: value,
+			}));
+		};
+	const handleReset = () => {
+		setCurrentArticleState(defaultArticleState);
+		setArticleState(defaultArticleState);
 	};
 
 	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
-		onSubmit(state);
-	};
-
-	const handleReset = () => {
-		setState(defaultArticleState);
-		onReset();
+		setArticleState(currentArticleState);
 	};
 
 	return (
 		<>
-			<ArrowButton isOpen={isOpen} onClick={toggle} />
+			<ArrowButton isOpen={isFormOpen} onClick={toggleForm} />
 			<aside
 				ref={sidebarRef}
 				className={`${styles.container} ${
-					isOpen ? styles.container_open : ''
+					isFormOpen ? styles.container_open : ''
 				}`}>
 				<form
 					className={styles.form}
@@ -75,7 +68,7 @@ export const ArticleParamsForm = ({
 					<div className={styles.item}>
 						<Select
 							options={fontFamilyOptions}
-							selected={state.fontFamilyOption}
+							selected={currentArticleState.fontFamilyOption}
 							onChange={handleFieldChange('fontFamilyOption')}
 							title='шрифт'
 						/>
@@ -83,7 +76,7 @@ export const ArticleParamsForm = ({
 					<div className={styles.item}>
 						<RadioGroup
 							name='radio'
-							selected={state.fontSizeOption}
+							selected={currentArticleState.fontSizeOption}
 							onChange={handleFieldChange('fontSizeOption')}
 							options={fontSizeOptions}
 							title='Размер шрифта'
@@ -92,7 +85,7 @@ export const ArticleParamsForm = ({
 					<div className={styles.item}>
 						<Select
 							options={fontColors}
-							selected={state.fontColor}
+							selected={currentArticleState.fontColor}
 							onChange={handleFieldChange('fontColor')}
 							title='цвет шрифта'
 						/>
@@ -103,7 +96,7 @@ export const ArticleParamsForm = ({
 					<div className={styles.item}>
 						<Select
 							options={backgroundColors}
-							selected={state.backgroundColor}
+							selected={currentArticleState.backgroundColor}
 							onChange={handleFieldChange('backgroundColor')}
 							title='цвет фона'
 						/>
@@ -111,7 +104,7 @@ export const ArticleParamsForm = ({
 					<div className={styles.item}>
 						<Select
 							options={contentWidthArr}
-							selected={state.contentWidth}
+							selected={currentArticleState.contentWidth}
 							onChange={handleFieldChange('contentWidth')}
 							title='ширина контента'
 						/>

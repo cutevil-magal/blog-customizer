@@ -9,7 +9,7 @@ export const useDisclosure = (
 	initialState = false,
 	{ onOpen, onClose }: UseDisclosureCallbacks = {}
 ) => {
-	const [isOpen, setIsOpen] = useState(initialState);
+	const [isFormOpen, setIsOpen] = useState(initialState);
 	const sidebarRef = useRef<HTMLDivElement>(null); // ссылка на элемент сайдбара
 
 	useEffect(() => {
@@ -17,22 +17,22 @@ export const useDisclosure = (
 	}, [initialState]);
 
 	useEffect(() => {
+		if (!isFormOpen) {
+			return;
+		}
 		const handleClickOutside = (event: MouseEvent) => {
-			if (
-				isOpen &&
-				sidebarRef.current &&
-				!sidebarRef.current.contains(event.target as Node)
-			) {
-				setIsOpen(false); // Закрываем сайдбар
-				onClose?.(); // Вызываем onClose, если он передан
+			if (isFormOpen && sidebarRef.current && event.target instanceof Node) {
+				if (!sidebarRef.current.contains(event.target)) {
+					setIsOpen(false);
+					onClose?.();
+				}
 			}
 		};
-
 		document.addEventListener('mousedown', handleClickOutside);
 		return () => {
 			document.removeEventListener('mousedown', handleClickOutside);
 		};
-	}, [isOpen]);
+	}, [isFormOpen, onClose]);
 
 	const open = () => {
 		setIsOpen(true);
@@ -44,9 +44,9 @@ export const useDisclosure = (
 		onClose?.();
 	};
 
-	const toggle = () => {
-		isOpen ? close() : open();
+	const toggleForm = () => {
+		isFormOpen ? close() : open();
 	};
 
-	return { isOpen, toggle, open, close, sidebarRef };
+	return { isFormOpen, toggleForm, open, close, sidebarRef };
 };
